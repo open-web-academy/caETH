@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract AccountRegistry {
+contract caETH {
     /**
      * @dev Structure to store information related to each account.
      * - `ETHaddress`: The Ethereum address of the account holder.
@@ -23,7 +23,7 @@ contract AccountRegistry {
     uint256 public totalLockedTokens;
 
     // Events to log deposits, locks, unlocks, and transfers for auditing and monitoring
-    event AccountRegistered(
+    event AccountDeposit(
         address indexed ETHaddress,
         string nearAccountId,
         uint256 newDeposit,
@@ -68,7 +68,7 @@ contract AccountRegistry {
         }
 
         // Emit an event to log the account registration and deposit details
-        emit AccountRegistered(
+        emit AccountDeposit(
             msg.sender,
             nearAccountId,
             msg.value,
@@ -211,3 +211,4 @@ contract AccountRegistry {
         return accounts[ethAddress];
     }
 }
+
