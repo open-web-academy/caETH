@@ -80,23 +80,116 @@ impl Contract {
     }
     
     // Recover ETH smart contract state
-    pub fn validate_eth(&mut self) {
+    pub fn validate_eth(&mut self, account_id: AccountId) {
         //Recover current ETH contract state
         
         // add a balance of mintable caeth into callers account
 
         //
-        log!("Closed @{} with {}", account_id, balance);
+        log!("Looking for balance on @{}", account_id);
     }
+    //Method to receive caETH and burn it
+    /*
+    pub fn ft_on_transfer(
+        &mut self,
+        sender_id: AccountId,
+        amount: U128,
+        msg: String,
+    ) -> PromiseOrValue<U128> {
+        let msg_json: MsgInput = from_str(&msg).unwrap();
+        let deposit = amount.0;
+        let user_account = env::signer_account_id();
+
+        log!("Deposit: {:?}",amount);
+        
+        env::log(
+            json!(msg_json.clone())
+            .to_string()
+            .as_bytes(),
+        );
+         
+        match msg_json.action_to_execute.as_str() {
+            "burn_caeth" => {
+
+                assert!(deposit % 1_000_000_000_000_000_000 == 0, "Deposit must be integer");
+                assert!(amount.0 >= 10000000000000000000000, "Deposit must be a minimum of 10,000 $HAT");
+
+                
+                env::log_str("Processing deposit of tokens"); 
+                assert_eq!(self.ft_token_id, env::predecessor_account_id(), "This token is not accepted.");
+
+                log!("The new countdown period is: {}", self.countdown_period);
+    
+                // Send FT tokens to treasury as fee
+                let covered_fees = amount.0 * self.treasury_fee / 100;
+
+                ft_contract::ft_transfer(
+                    "000000000000000000000000000000",
+                    U128::from(covered_fees.clone()),
+                    None,
+                    self.ft_token_id.clone(),
+                    1,
+                    Gas(100_000_000_000_000)
+                );
+    
+                log!("Deposit to fees: {}", covered_fees);
+    
+                // Calculate deposit without fees
+                let deposit_without_fees = amount.0 * (100-self.treasury_fee) / 100;
+                log!("Deposit to vault: {}", deposit_without_fees);
+    
+                // Update balance of active vault
+                self.ft_token_balance += amount.0;
+                log!("The new vault balance is: {}", self.ft_token_balance);
+    
+                // Update the active vault with the new deposit, user account and date end
+                active_vault.winner = user_account.clone();
+                active_vault.token_amount += deposit_without_fees;
+                active_vault.token_amount_complete += amount.0;
+                active_vault.date_end = self.countdown_period;
+                
+                self.time_last_deposit = current_timestamp;
+                self.account_last_deposit = user_account;
+
+                self.highest_deposit = if deposit > self.highest_deposit {
+                    deposit
+                } else {
+                    self.highest_deposit
+                };
+
+                self.vaults.replace(active_vault_index.try_into().unwrap(), &active_vault);
+    
+                // Guardar la información del depósito en el historial
+                self.deposit_history.insert(&DepositInfo {
+                    account_id: self.account_last_deposit.clone(),
+                    date: self.time_last_deposit,
+                    ft_amount: amount.0.to_string(),
+                    deposit_or_withdraw: true,
+                });
+    
+                PromiseOrValue::Value(U128::from(0))
+            }
+            _ => PromiseOrValue::Value(U128::from(amount)),
+        }
+        
+    }*/
+
     
     // Mint total balance of caETH pending 
     // Minimum of caETH to be minted 
-    pub fn mint_caeth(&mut self) {
+    pub fn mint_caeth(&mut self, account_id: AccountId, balance: Balance) {
         //validate current amount of caETH available to be minted
         
         //mint caETH into callers accounts
+        self.token.internal_deposit(&account_id, balance.into());
+        near_contract_standards::fungible_token::events::FtMint {
+            owner_id: &account_id,
+            amount: &balance.into(),
+            memo: Some("caETH supply is minted"),
+        }
+        .emit();
 
-        log!("Closed @{} with {}", account_id, balance);
+        log!("Minting available @{} caETH to {}", balance, account_id);
     }
     
     fn on_account_closed(&mut self, account_id: AccountId, balance: Balance) {
