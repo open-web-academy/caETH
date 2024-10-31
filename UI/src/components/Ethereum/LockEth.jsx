@@ -6,15 +6,16 @@ import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 import { useImperativeHandle } from 'react';
 
-export const FunctionCallForm = forwardRef(({ props: { Eth, senderAddress, loading, caETHContract, caETHabi } }, ref) => {
+
+export const LockEthForm = forwardRef(({ props: { Eth, senderAddress, loading, caETHContract, caETHabi } }, ref) => {
   const { wallet, signedAccountId } = useContext(NearContext);
-  const [amount, setAmount] = useState(0.005);
+  const [amount, setAmount] = useState(0);
 
   useImperativeHandle(ref, () => ({
     async createPayload() {
-      const data = Eth.createTransactionData(caETHContract, caETHabi, 'deposit', [signedAccountId]);
+      const data = Eth.createTransactionData(caETHContract, caETHabi, 'lockTokens', [amount]);
       console.log(data)
-      const { transaction, payload } = await Eth.createPayload(senderAddress, caETHContract, amount, data);
+      const { transaction, payload } = await Eth.createPayload(senderAddress, caETHContract, 0, data);
       console.log(transaction,payload)
       return { transaction, payload };
     },
@@ -26,7 +27,7 @@ export const FunctionCallForm = forwardRef(({ props: { Eth, senderAddress, loadi
 
   return (
     <>
-      <h5 className="text-center">Deposit ETH</h5>
+      <h5 className="text-center">Lock ETH</h5>
       <div className="row mb-3">
         <label className="col-sm-2 col-form-label col-form-label-sm">Amount:</label>
         <div className="col-sm-10">
@@ -40,7 +41,7 @@ export const FunctionCallForm = forwardRef(({ props: { Eth, senderAddress, loadi
   );
 });
 
-FunctionCallForm.propTypes = {
+LockEthForm.propTypes = {
   props: PropTypes.shape({
     senderAddress: PropTypes.string.isRequired,
     loading: PropTypes.bool.isRequired,
@@ -52,4 +53,4 @@ FunctionCallForm.propTypes = {
   }).isRequired
 };
 
-FunctionCallForm.displayName = 'EthereumContractView';
+LockEthForm.displayName = 'EthereumContractView';
